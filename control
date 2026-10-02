@@ -1,0 +1,9 @@
+Package: com.flo.hipcharge
+Name: HIPCharge
+Version: @VERSION@
+Architecture: iphoneos-arm64
+Description: Enables Simulate HIP while charging, disables it when unplugged.
+Maintainer: Flo
+Author: Flo
+Section: Tweaks
+Depends: firmware (>= 15.0)

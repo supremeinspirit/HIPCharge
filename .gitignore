@@ -1,0 +1,4 @@
+hipchargd
+pkg/
+*.deb
+*.bak

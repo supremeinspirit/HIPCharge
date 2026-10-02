@@ -1,0 +1,4 @@
+#!/var/jb/bin/sh
+launchctl unload /var/jb/Library/LaunchDaemons/com.flo.hipcharge.plist 2>/dev/null
+launchctl load /var/jb/Library/LaunchDaemons/com.flo.hipcharge.plist
+exit 0
