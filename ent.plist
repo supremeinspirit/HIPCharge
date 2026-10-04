@@ -4,5 +4,5 @@
 	<key>platform-application</key><true/>
 	<key>com.apple.private.security.no-container</key><true/>
 	<key>com.apple.private.security.no-sandbox</key><true/>
-	<key>com.apple.private.usernotifications.bundle-identifiers</key><array><string>com.apple.powerui.chargeawareness</string></array>
+	<key>com.apple.private.usernotifications.bundle-identifiers</key><array><string>com.apple.powerui.chargeawareness</string><string>com.apple.powerui.smartcharging</string></array>
 </dict></plist>

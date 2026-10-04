@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
-	<key>Label</key><string>com.flo.hipcharge</string>
+	<key>Label</key><string>com.supremeinspirit.hipcharge</string>
 	<key>ProgramArguments</key><array><string>/var/jb/usr/libexec/hipchargd</string></array>
 	<key>UserName</key><string>root</string>
 	<key>RunAtLoad</key><true/>

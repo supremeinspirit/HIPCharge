@@ -7,8 +7,7 @@
 #include <os/log.h>
 #include "banner.h"
 
-#define kBannerBundleID @"com.apple.powerui.chargeawareness"
-#define kBannerID @"com.flo.hipcharge"
+#define kBannerID @"com.supremeinspirit.hipcharge"
 
 @interface UNUserNotificationCenter (Private)
 - (instancetype)initWithBundleIdentifier:(NSString *)bundleIdentifier;
@@ -19,7 +18,13 @@ static NSUInteger gGeneration;
 
 void showBanner(const char *body) {
 	@autoreleasepool {
-		if (!gCenter) gCenter = [[UNUserNotificationCenter alloc] initWithBundleIdentifier:kBannerBundleID];
+		if (!gCenter) {
+			if (![UNUserNotificationCenter instancesRespondToSelector:@selector(initWithBundleIdentifier:)]) return;
+			// chargeawareness is iOS 14+; older versions have the Optimized Charging section
+			NSString *bundleID = [[NSFileManager defaultManager] fileExistsAtPath:@"/System/Library/UserNotifications/Bundles/com.apple.powerui.chargeawareness.bundle"]
+				? @"com.apple.powerui.chargeawareness" : @"com.apple.powerui.smartcharging";
+			gCenter = [[UNUserNotificationCenter alloc] initWithBundleIdentifier:bundleID];
+		}
 		UNMutableNotificationContent *content = [UNMutableNotificationContent new];
 		content.title = @"HIPCharge";
 		content.body = @(body);

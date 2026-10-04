@@ -2,3 +2,5 @@ hipchargd
 pkg/
 *.deb
 *.bak
+legacy/
+research/
