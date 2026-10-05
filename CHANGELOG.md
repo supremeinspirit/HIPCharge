@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.6.0
+
+### New: Control Center toggles
+HIPCharge now has two toggles for the Control Center. They work on both versions (rootless and legacy rootful).
+
+**What you need:** [CCSupport](https://github.com/opa334/CCSupport). Without it HIPCharge works as before, you just don't get the toggles.
+
+**How to add them:** respring once after installing, then go to Settings → Control Center and add "HIPCharge" and "Simulate HIP".
+
+- **HIPCharge** – turns HIPCharge on or off.
+  - On: HIP is switched on when you plug in and off when you unplug, as before.
+  - Off: plugging in or unplugging does nothing.
+  - Your choice is remembered after a reboot.
+- **Simulate HIP** – turns HIP on or off by hand, right now, like the switch in Battman.
+  - It works whether HIPCharge is on or off.
+  - It is off again after a reboot.
+
+Each time you press a toggle, a short banner confirms it: "HIPCharge on/off" or "Simulate HIP on/off".
+
+### Changed
+- The legacy rootful version now shows the same banners as the rootless one when you plug in or unplug: "Charging: Simulate HIP ON" and "Unplugged: Simulate HIP OFF".
+
 ## 1.5.0
 
 ### New

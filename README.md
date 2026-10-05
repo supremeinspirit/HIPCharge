@@ -11,6 +11,17 @@ Keeps **HIP** (Hot-in-Pocket thermal mitigation) active while the device is char
 
 Tested on iOS 17.3 (rootless), iOS 15.2.1 (rootless) and iOS 13.3 (rootful, iPhone X). On A12 and newer phones running iOS 12–13, the legacy tweak's arm64e slice may not load.
 
+## Control Center toggles
+
+With [CCSupport](https://github.com/opa334/CCSupport) installed, two toggles can be added in Settings → Control Center:
+
+| Toggle | What it does |
+|---|---|
+| **HIPCharge** | Turns HIPCharge on or off. While off, plugging in or unplugging changes nothing. |
+| **Simulate HIP** | Turns Simulate HIP on or off right away, like Battman's switch, whether or not HIPCharge is on. |
+
+The toggles only show the state the daemon publishes and ask the daemon to change it, because SpringBoard isn't allowed to write the thermal settings itself.
+
 ## How it works
 
 - `hipchargd` listens for power-source changes through `IOPSNotificationCreateRunLoopSource` and posts the banner from the daemon itself through iOS's own PowerUI notification section, so it doesn't inject anything into SpringBoard.
@@ -38,5 +49,7 @@ You need `clang`, `ldid`, `dpkg-deb`, and an iPhoneOS SDK at `/var/jb/usr/share/
 make deb          # rootless package
 make legacy-deb   # legacy rootful package
 ```
+
+The Control Center modules also need Theos' iPhoneOS 16.5 SDK and vendor headers (`CCSDK=...`, `CCINCLUDE=...`). Their class is created at runtime, without `@implementation` or `@""` literals, because the on-device clang doesn't sign those for arm64e and SpringBoard would crash loading them.
 
 See [CHANGELOG.md](CHANGELOG.md) for release notes.

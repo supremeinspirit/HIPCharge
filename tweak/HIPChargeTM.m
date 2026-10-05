@@ -6,26 +6,39 @@
 // read there, so while charging they report NO and HIP stays on regardless of the screen.
 // Only the getters are replaced: the real values are still stored, and the methods are looked
 // up by name, so there are no build-specific addresses. Missing methods are left alone.
+// The daemon's published state (ipc.h) decides when HIP is forced: while charging if HIPCharge
+// is enabled, and always if Simulate HIP is on. Without a daemon it acts as if enabled.
 
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
+#import <objc/message.h>
 #include <os/log.h>
+#include <notify.h>
+#include "../ipc.h"
 
 static BOOL (*origConnectedExternally)(id, SEL);
 static BOOL (*origBacklightIsOn)(id, SEL);
 static BOOL (*origAudioIsOn)(id, SEL);
 
-static BOOL charging(id self) {
-	return origConnectedExternally(self, sel_registerName("connectedExternally"));
+static int stateToken = -1;
+static __unsafe_unretained id context;
+
+static BOOL forced(id self) {
+	context = self;
+	uint64_t state = 0;
+	if (stateToken == -1 || notify_get_state(stateToken, &state) != NOTIFY_STATUS_OK || !(state & HIPCHARGE_STATE_VALID))
+		state = HIPCHARGE_STATE_ENABLED;
+	if (state & HIPCHARGE_STATE_SIMULATE) return YES;
+	return (state & HIPCHARGE_STATE_ENABLED) && origConnectedExternally(self, sel_registerName("connectedExternally"));
 }
 static BOOL connectedExternally(id self, SEL _cmd) {
-	return NO;
+	return forced(self) ? NO : origConnectedExternally(self, _cmd);
 }
 static BOOL backlightIsOn(id self, SEL _cmd) {
-	return charging(self) ? NO : origBacklightIsOn(self, _cmd);
+	return forced(self) ? NO : origBacklightIsOn(self, _cmd);
 }
 static BOOL audioIsOn(id self, SEL _cmd) {
-	return charging(self) ? NO : origAudioIsOn(self, _cmd);
+	return forced(self) ? NO : origAudioIsOn(self, _cmd);
 }
 
 static IMP hookGetter(Class cls, const char *name, IMP imp) {
@@ -48,6 +61,13 @@ __attribute__((constructor)) static void init(void) {
 	}
 	origBacklightIsOn = (BOOL (*)(id, SEL))hookGetter(cls, "backlightIsOn", (IMP)backlightIsOn);
 	origAudioIsOn = (BOOL (*)(id, SEL))hookGetter(cls, "audioIsOn", (IMP)audioIsOn);
+	// Re-evaluate when a Control Center toggle changes the state, not only on the next
+	// backlight or power event
+	notify_register_dispatch(HIPCHARGE_STATE, &stateToken, dispatch_get_main_queue(), ^(int token) {
+		SEL update = sel_registerName("updateContextActiveState");
+		id ctx = context;
+		if (ctx && [ctx respondsToSelector:update]) ((void (*)(id, SEL))objc_msgSend)(ctx, update);
+	});
 	os_log(OS_LOG_DEFAULT, "HIPChargeTM: HIP forced while charging (backlight %d, audio %d)",
 		origBacklightIsOn != NULL, origAudioIsOn != NULL);
 }
