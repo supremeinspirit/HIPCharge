@@ -1,5 +1,5 @@
 # Changelog
-added Control Center toggled snd fixed some issues with them in Legacy version.
+added Control Center toggles and fixed some issues with them in Legacy version.
 ## 1.6.1
 
 ### Fixed
