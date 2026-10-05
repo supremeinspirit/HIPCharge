@@ -6,8 +6,9 @@
 // read there, so while charging they report NO and HIP stays on regardless of the screen.
 // Only the getters are replaced: the real values are still stored, and the methods are looked
 // up by name, so there are no build-specific addresses. Missing methods are left alone.
-// The daemon's published state (ipc.h) decides when HIP is forced: while charging if HIPCharge
-// is enabled, and always if Simulate HIP is on. Without a daemon it acts as if enabled.
+// HIP is forced while the daemon's published Simulate HIP flag (ipc.h) is on. The daemon turns
+// it on when power is connected and off when unplugged, and the Control Center toggle can
+// change it at any time. Without a daemon HIP is forced while charging.
 
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
@@ -26,10 +27,10 @@ static __unsafe_unretained id context;
 static BOOL forced(id self) {
 	context = self;
 	uint64_t state = 0;
-	if (stateToken == -1 || notify_get_state(stateToken, &state) != NOTIFY_STATUS_OK || !(state & HIPCHARGE_STATE_VALID))
-		state = HIPCHARGE_STATE_ENABLED;
-	if (state & HIPCHARGE_STATE_SIMULATE) return YES;
-	return (state & HIPCHARGE_STATE_ENABLED) && origConnectedExternally(self, sel_registerName("connectedExternally"));
+	if (stateToken != -1 && notify_get_state(stateToken, &state) == NOTIFY_STATUS_OK && (state & HIPCHARGE_STATE_VALID))
+		return (state & HIPCHARGE_STATE_SIMULATE) != 0;
+	// No daemon: force HIP while charging
+	return origConnectedExternally(self, sel_registerName("connectedExternally"));
 }
 static BOOL connectedExternally(id self, SEL _cmd) {
 	return forced(self) ? NO : origConnectedExternally(self, _cmd);

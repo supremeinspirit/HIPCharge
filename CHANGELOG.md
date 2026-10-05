@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.6.1
+
+### Fixed
+- **Legacy rootful version (iOS 12–14):** the "Simulate HIP" toggle stayed grey while the phone was charging, even though HIP was on. It now lights up as soon as you plug in and goes grey when you unplug, so it always shows what the phone is doing right now. You can also press it while charging to turn HIP off.
+
 ## 1.6.0
 
 ### New: Control Center toggles

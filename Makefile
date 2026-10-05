@@ -1,7 +1,7 @@
 SHELL := /var/jb/bin/sh
 SDK ?= /var/jb/usr/share/SDKs/iPhoneOS.sdk
 PREFIX ?= /var/jb
-VERSION = 1.6.0
+VERSION = 1.6.1
 # The Control Center modules need the private ControlCenterUIKit stub and headers from Theos
 CCSDK ?= /var/jb/theos/sdks/iPhoneOS16.5.sdk
 CCINCLUDE ?= /var/jb/theos/vendor/include

@@ -1,7 +1,7 @@
 // HIPCharge: enable Battman's "Simulate HIP" while charging, disable it otherwise.
 // Uses the same OSThermalStatus SCPreferences keys as Battman (scprefs/wrapper.c).
-// HIPCHARGE_TWEAK builds (iOS < 15, no simulateHip key) leave that to the HIPChargeTM
-// tweak in thermalmonitord and only show the banners.
+// HIPCHARGE_TWEAK builds (iOS < 15, no simulateHip key) keep the same on/off flag themselves
+// and publish it for the HIPChargeTM tweak in thermalmonitord, which forces HIP while it's on.
 // The Control Center modules switch HIPCharge itself and Simulate HIP through the notify
 // commands in ipc.h; Simulate HIP works whether or not HIPCharge is enabled.
 
@@ -68,8 +68,8 @@ static bool simulateHIPEnabled(void) {
 	return on;
 }
 #else
-// No simulateHip key before iOS 15: the tweak reads this from the published state. Like
-// the real key it is not kept across a restart.
+// No simulateHip key before iOS 15: this flag stands in for it, set on plug/unplug and by
+// the Control Center toggle alike, and the tweak reads it from the published state.
 static bool gSimulate;
 static int setSimulateHIPEnabled(bool enable) {
 	gSimulate = enable;
@@ -123,19 +123,13 @@ static void update(void *ctx) {
 	bool initial = lastState == -1;
 	lastState = state;
 	if (!gEnabled) return;
-#ifdef HIPCHARGE_TWEAK
-	os_log(gLog, "power %s", state ? "connected" : "disconnected");
-	if (initial) return;
-	showBanner(state ? "Charging: Simulate HIP ON" : "Unplugged: Simulate HIP OFF");
-#else
 	int ret = setSimulateHIPEnabled(state);
 	os_log(gLog, "power %s -> simulate HIP %s (status %d)", state ? "connected" : "disconnected", state ? "on" : "off", ret);
+	publishState();
 	// No banner for the startup check (SpringBoard may not be up yet at boot)
 	if (initial) return;
 	showBanner(ret != kSCStatusOK ? "Failed to change Simulate HIP"
 		: state ? "Charging: Simulate HIP ON" : "Unplugged: Simulate HIP OFF");
-	publishState();
-#endif
 }
 
 static void setEnabled(bool enable) {
@@ -144,10 +138,8 @@ static void setEnabled(bool enable) {
 	CFPreferencesSetAppValue(CFSTR("enabled"), enable ? kCFBooleanTrue : kCFBooleanFalse, PREFS_ID);
 	CFPreferencesAppSynchronize(PREFS_ID);
 	os_log(gLog, "HIPCharge %s", enable ? "enabled" : "disabled");
-#ifndef HIPCHARGE_TWEAK
 	// Take over (or hand back) right away if the device is charging
 	if (isCharging()) setSimulateHIPEnabled(enable);
-#endif
 	publishState();
 	showBanner(enable ? "HIPCharge on" : "HIPCharge off");
 }
